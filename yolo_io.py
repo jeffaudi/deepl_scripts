@@ -3,28 +3,28 @@
 import sys
 import os
 from PIL import Image
-from libs.constants import DEFAULT_ENCODING
 
-# inspired from import https://raw.githubusercontent.com/tzutalin/labelImg/master/libs/yolo_io.py
+## inspired from https://github.com/tzutalin/labelImg/blob/master/libs/yolo_io.py
 
 TXT_EXT = '.txt'
 JPG_EXT = '.jpg'
-ENCODE_METHOD = DEFAULT_ENCODING
+DEFAULT_ENCODING = 'utf-8'
 
 class YOLOWriter:
 
     def __init__(self, folder_name):
         self.folder_name = folder_name
         self.class_list = []
+        self.root_name = None
         
-    def new_image(filename = None, img_size = None):
+    def new_image(self, filename = None, img_size = None):
         # TODO: Manage exceptions
         self.box_list = []
         if filename is not None:
-          im = Image.open(filename')
+          im = Image.open(filename)
           self.img_size = im.size
-          self.rootname = os.path.splitext(os.path.basename(filename))[0]
-          im.save(os.path.join(folder, 'images', self.filename + JPG_EXT))
+          self.root_name = os.path.splitext(os.path.basename(filename))[0]
+          im.save(os.path.join(self.folder_name, 'images', self.root_name + JPG_EXT))
         else:
           self.img_size = img_size
         
@@ -58,11 +58,11 @@ class YOLOWriter:
     def save_labels(self, target = None):
 
         if target is None:
-            target = os.path.join(folder, 'labels', self.filename + TXT_EXT)
+            target = os.path.join(self.folder_name, 'labels', self.root_name + TXT_EXT)
 
-        out_file = open(target, 'w', encoding=ENCODE_METHOD)
+        out_file = open(target, 'w', encoding=DEFAULT_ENCODING)
         for box in self.box_list:
-            class_index, x_center, y_center, w, h = self.bnd_box_to_yolo_line(box, class_list)
+            class_index, x_center, y_center, w, h = self.bnd_box_to_yolo_line(box)
             # print (classIndex, x_center, y_center, w, h)
             out_file.write("%d %.6f %.6f %.6f %.6f\n" % (class_index, x_center, y_center, w, h))
 
@@ -74,7 +74,7 @@ class YOLOWriter:
         if target is None:
             target = os.path.join(os.path.dirname(os.path.abspath(self.filename)), "classes.txt")
 
-        out_class_file = open(target, 'w')
+        out_class_file = open(target, 'w', encoding=DEFAULT_ENCODING)
         for c in self.class_list:
             out_class_file.write(c+'\n')
 
